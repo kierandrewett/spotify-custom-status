@@ -3,9 +3,13 @@ const open = require("open");
 const chalk = require("chalk");
 const fs = require("fs");
 
-open(
-  "https://accounts.spotify.com/en/authorize?response_type=token&redirect_uri=http:%2F%2Flocalhost:3000%2Fauthorize&client_id=02f6ad5796084bb59c0cfde471a68a66&scope=user-read-currently-playing"
-);
+(async () => {
+  await open(
+    "https://accounts.spotify.com/en/authorize?response_type=token&redirect_uri=http:%2F%2Flocalhost:3000%2Fauthorize&client_id=02f6ad5796084bb59c0cfde471a68a66&scope=user-read-currently-playing"
+  );
+})();
+
+var lastStatus = "";
 
 Date.prototype.addHours = function(h) {
   this.setHours(this.getHours() + h);
@@ -53,36 +57,43 @@ function client() {
           track.emoji = "⏸";
         }
 
-        patch(
-          "https://canary.discordapp.com/api/v6/users/@me/settings",
-          {
-            custom_status: {
-              text: `${track.overview}`,
-              expires_at: new Date().addHours(4).toISOString(),
-              emoji_name: track.emoji
+        if (lastStatus != track.overview) {
+          lastStatus = track.overview;
+          patch(
+            "https://canary.discordapp.com/api/v6/users/@me/settings",
+            {
+              custom_status: {
+                text: `${track.overview}`,
+                expires_at: new Date().addHours(4).toISOString(),
+                emoji_name: track.emoji
+              }
+            },
+            {
+              headers: {
+                Authorization: require("./config").token,
+                "Content-Type": "application/json"
+              }
             }
-          },
-          {
-            headers: {
-              Authorization: require("./config").token,
-              "Content-Type": "application/json"
-            }
-          }
-        )
-          .then(() => {
-            console.log(
-              `${chalk.gray(">")} Dispatched status event for ${
-                track.name
-              }, and it expires in 4 hours. Next dispatch in 8 seconds...`
-            );
-          })
-          .catch(err => {
-            console.log(
-              `${chalk.red(
-                "> Failed to dispatch custom status. Is your token set or up to date?"
-              )}`
-            );
-          });
+          )
+            .then(() => {
+              console.log(
+                `${chalk.gray(">")} Dispatched status event for ${
+                  track.name
+                }, and it expires in 4 hours. Next dispatch in 8 seconds...`
+              );
+            })
+            .catch(err => {
+              console.log(
+                `${chalk.red(
+                  "> Failed to dispatch custom status. Is your token set or up to date?"
+                )}`
+              );
+            });
+        } else {
+          console.log(
+            `${chalk.gray("> Skipped dispatch because status hasn't changed.")}`
+          );
+        }
       } else {
         patch(
           "https://canary.discordapp.com/api/v6/users/@me/settings",
