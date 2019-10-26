@@ -1,0 +1,19 @@
+script(src='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/js/bootstrap.min.js')
+link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/css/bootstrap.css")
+main.container
+	.row
+		.col-lg-12.p-5
+			div.card(style="border: none; background: none")
+				.card-header(style="border: none; background: none; text-align: center;")
+					img(src="https://discordapp.com/assets/fe3770614c2658a07dea3ecb286ce745.png", style="text-align: center; filter: invert(1)", width="120")
+					h1.h3(style="text-align: center") Connected Discord to your Spotify
+					h3.h3(style="font-size: 20px;color:gray;") You now may close this tab.
+					br
+					p.p You also may want to add your discord token to the config file found in the custom status folder.
+script. 
+	var token = window.location.hash.split("access_token=")[1].split("&token_type=")[0];
+	//- window.location.hash = "";
+	fetch(`${window.location.href.split("#")[0]}/${token}`, {
+		method: 'post',
+		body: JSON.stringify({})
+	})

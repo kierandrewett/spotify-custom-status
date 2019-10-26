@@ -1,0 +1,4 @@
+{
+  "information": "* Enter your Discord token below. Custom Status updates won't work without it! You should also rename this file to config.json *",
+  "token": ""
+}
